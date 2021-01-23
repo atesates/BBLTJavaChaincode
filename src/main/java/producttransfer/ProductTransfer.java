@@ -1,5 +1,9 @@
 package producttransfer;
 
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.Contract;
@@ -35,7 +39,7 @@ public final class ProductTransfer implements ContractInterface {
 
 		Product product = new Product("FirstOwner_FirstProduct_00.00.2000", 
 				"FirstProduct_00.00.2000", "FirstProduct", "FirstOwner", 
-				"100", "10", "02.02.2020", "01.01.2199",
+				"10$", "70", "02.02.2020", "01.01.2199",
 				"on sale", "FirstOwner", "00.00.2000", " ");
 
 		String productState = genson.serialize(product);
@@ -65,7 +69,7 @@ public final class ProductTransfer implements ContractInterface {
 	@Transaction()
 	public Product addNewProduct(final Context ctx, final String id, final String productId, final String name, final String numberOf,
 			final String ownername, final String value, final String manufacturedDate, final String expirationDate,
-			final String status, final String supplyer, final String issueDate, final String demander) {
+			final String status, final String supplier, final String issueDate, final String demander) {
 
 		ChaincodeStub stub = ctx.getStub();
 
@@ -78,7 +82,7 @@ public final class ProductTransfer implements ContractInterface {
 		}
 
 		Product product = new Product(id, productId, name, ownername, numberOf, value, manufacturedDate, expirationDate, status,
-				supplyer, issueDate, demander);
+				supplier, issueDate, demander);
 
 		productState = genson.serialize(product);
 
@@ -119,6 +123,8 @@ public final class ProductTransfer implements ContractInterface {
 	 */
 	@Transaction()
 	public Product changeProductOwnership(final Context ctx, final String id, final String newProductOwner) {
+		DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+	       Date dateobj = new Date();
 		ChaincodeStub stub = ctx.getStub();
 
 		String productState = stub.getStringState(id);
@@ -135,7 +141,7 @@ public final class ProductTransfer implements ContractInterface {
 
 		Product newProduct = new Product(product.getId(),product.getProductId(), product.getName(), newProductOwner, product.getValue(),
 				product.getNumberOf(), product.getManufacturedDate(), product.getExpirationDate(), "changed",
-				product.getSupplier(), product.getIssueDate(), product.getDemander());
+				product.getSupplier(),df.format(dateobj), product.getDemander());
 
 		String newProductState = genson.serialize(newProduct);
 		stub.putStringState(id, newProductState);
@@ -178,7 +184,10 @@ public final class ProductTransfer implements ContractInterface {
 	 */
 	@Transaction()
 	public Product purchaseSomeProduct(final Context ctx, final String id, final String newProductOwner,
-			final String numberOfPurchased) {
+			final String numberOfPurchased) {		
+		DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+	       Date dateobj = new Date();
+	       
 		ChaincodeStub stub = ctx.getStub();
 
 		String productState = stub.getStringState(id);
@@ -208,7 +217,7 @@ public final class ProductTransfer implements ContractInterface {
 					product.getName(), newProductOwner, product.getValue(),
 					numberOfPurchased.toString(), product.getManufacturedDate(), 
 					product.getExpirationDate(), "purchased",
-					product.getOwner(), product.getIssueDate(), newProductOwner);
+					product.getOwner(), df.format(dateobj), newProductOwner);
 
 			String newProductState2 = genson.serialize(newProduct2);
 			//create purchase
@@ -225,7 +234,7 @@ public final class ProductTransfer implements ContractInterface {
 					product.getName(), newProductOwner, product.getValue(),
 					numberOfPurchased.toString(), product.getManufacturedDate(), 
 					product.getExpirationDate(), "purchased",
-					product.getOwner(), product.getIssueDate(), newProductOwner);
+					product.getOwner(), df.format(dateobj), newProductOwner);
 
 			String newProductState2 = genson.serialize(newProduct2);
 			//create purchase
