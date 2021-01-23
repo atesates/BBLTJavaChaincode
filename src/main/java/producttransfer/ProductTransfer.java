@@ -33,8 +33,10 @@ public final class ProductTransfer implements ContractInterface {
 
 		ChaincodeStub stub = ctx.getStub();
 
-		Product product = new Product("1", "FirstProduct", "FirstOwner", "100", "10", "02.02.2020", "01.01.2199",
-				"on sale", " ", " ");
+		Product product = new Product("FirstOwner_FirstProduct_00.00.2000", 
+				"FirstProduct_00.00.2000", "FirstProduct", "FirstOwner", 
+				"100", "10", "02.02.2020", "01.01.2199",
+				"on sale", "FirstOwner", "00.00.2000", " ");
 
 		String productState = genson.serialize(product);
 
@@ -46,20 +48,24 @@ public final class ProductTransfer implements ContractInterface {
 	 *
 	 * @param ctx              the transaction context
 	 * @param id               the key for the new product
+	 * @param productId        the id for the new product
 	 * @param name             the name of the new product
 	 * @param numberOf         the number of the new product
 	 * @param ownername        the owner of the new product
 	 * @param value            the value of the new product
 	 * @param manufacturedDate the manufacturedDate of the new product
 	 * @param expirationDate   the expirationDate of the new product
+	 * @param issueDate        the issueDate of the new product
+	 * @param supplier         the supplier of the new product
+	 * @param demander         the demander of the new product
 	 * @param status           the status of the new product, on sale or purchased
 	 * @return the created product
 	 */
 
 	@Transaction()
-	public Product addNewProduct(final Context ctx, final String id, final String name, final String numberOf,
+	public Product addNewProduct(final Context ctx, final String id, final String productId, final String name, final String numberOf,
 			final String ownername, final String value, final String manufacturedDate, final String expirationDate,
-			final String status, final String supplyer, final String issueDate) {
+			final String status, final String supplyer, final String issueDate, final String demander) {
 
 		ChaincodeStub stub = ctx.getStub();
 
@@ -71,8 +77,8 @@ public final class ProductTransfer implements ContractInterface {
 			throw new ChaincodeException(errorMessage, ProductTransferErrors.PRODUCT_ALREADY_EXISTS.toString());
 		}
 
-		Product product = new Product(id, name, ownername, numberOf, value, manufacturedDate, expirationDate, status,
-				supplyer, issueDate);
+		Product product = new Product(id, productId, name, ownername, numberOf, value, manufacturedDate, expirationDate, status,
+				supplyer, issueDate, demander);
 
 		productState = genson.serialize(product);
 
@@ -127,9 +133,9 @@ public final class ProductTransfer implements ContractInterface {
 
 		Product product = genson.deserialize(productState, Product.class);
 
-		Product newProduct = new Product(product.getId(), product.getName(), newProductOwner, product.getValue(),
+		Product newProduct = new Product(product.getId(),product.getProductId(), product.getName(), newProductOwner, product.getValue(),
 				product.getNumberOf(), product.getManufacturedDate(), product.getExpirationDate(), "changed",
-				product.getSupplyer(), product.getIssueDate());
+				product.getSupplier(), product.getIssueDate(), product.getDemander());
 
 		String newProductState = genson.serialize(newProduct);
 		stub.putStringState(id, newProductState);
@@ -187,9 +193,9 @@ public final class ProductTransfer implements ContractInterface {
 
 		Integer remaining = Integer.parseInt(product.getNumberOf()) - Integer.parseInt(numberOfPurchased);
 
-		Product newProduct = new Product(product.getId(), product.getName(), product.getOwner(), product.getValue(),
+		Product newProduct = new Product(product.getId(), product.getProductId(), product.getName(), product.getOwner(), product.getValue(),
 				remaining.toString(), product.getManufacturedDate(), product.getExpirationDate(), "on sale",
-				product.getSupplyer(), product.getIssueDate());
+				product.getSupplier(), product.getIssueDate(), product.getDemander());
 		
 		if (remaining > 0) {// if the number of the supply is enough for purchase
 			
@@ -197,11 +203,12 @@ public final class ProductTransfer implements ContractInterface {
             //update supply
 			stub.putStringState(id, newProductState);
 			
-			Product newProduct2 = new Product(product.getName() + product.getManufacturedDate() + product.getIssueDate(),
+			Product newProduct2 = new Product(product.getOwner() + product.getName() + product.getIssueDate(),
+					product.getProductId(), 
 					product.getName(), newProductOwner, product.getValue(),
 					numberOfPurchased.toString(), product.getManufacturedDate(), 
 					product.getExpirationDate(), "purchased",
-					product.getOwner(), product.getIssueDate());
+					product.getOwner(), product.getIssueDate(), newProductOwner);
 
 			String newProductState2 = genson.serialize(newProduct2);
 			//create purchase
@@ -212,7 +219,19 @@ public final class ProductTransfer implements ContractInterface {
 		} else if(remaining == 0) {//all product is purchased
 			//delete supply		
 			stub.delState(id);
-			return newProduct;			
+			
+			Product newProduct2 = new Product(product.getOwner() + product.getName() + product.getIssueDate(),
+					product.getProductId(), 
+					product.getName(), newProductOwner, product.getValue(),
+					numberOfPurchased.toString(), product.getManufacturedDate(), 
+					product.getExpirationDate(), "purchased",
+					product.getOwner(), product.getIssueDate(), newProductOwner);
+
+			String newProductState2 = genson.serialize(newProduct2);
+			//create purchase
+			stub.putStringState(id, newProductState2);
+			
+			return newProduct2;			
 		}
 		else {//intended to be purchased product is more than supply
 			String errorMessage = String.format("Supply %s is not enough", id);

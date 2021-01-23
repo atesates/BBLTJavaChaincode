@@ -12,6 +12,9 @@ public final class Product {
 	private final String id;
 
 	@Property()
+	private final String productId;
+	
+	@Property()
 	private final String name;
 
 	@Property()
@@ -36,13 +39,19 @@ public final class Product {
 	private final String issueDate;
 	
 	@Property()
-	private final String supplyer;
+	private final String supplier;
 	
+	@Property()
+	private final String demander;
 	
 	public String getId() {
 		return id;
 	}
-
+	
+	public String getProductId() {
+		return productId;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -75,11 +84,16 @@ public final class Product {
 		return issueDate;
 	}
 	
-	public String getSupplyer() {
-		return supplyer;
+	public String getSupplier() {
+		return supplier;
+	}
+	
+	public String getDemander() {
+		return demander;
 	}
 	
 	public Product(@JsonProperty("id") final String id, 
+			@JsonProperty("productId") final String productId, 
 			@JsonProperty("name") final String name,
 			@JsonProperty("owner") final String owner, 
 			@JsonProperty("value") final String value,
@@ -87,9 +101,11 @@ public final class Product {
 			@JsonProperty("manufacturedDate") final String manufacturedDate,
 			@JsonProperty("expirationDate") final String expirationDate,
 			@JsonProperty("status") final String status,
-			@JsonProperty("supplyer") final String supplyer,
-			@JsonProperty ("issueDate")final String issueDate) {
+			@JsonProperty("supplier") final String supplier,
+			@JsonProperty ("issueDate")final String issueDate, 
+			@JsonProperty("demander") final String demander) {
 		this.id = id;
+		this.productId = productId;
 		this.name = name;
 		this.owner = owner;
 		this.value = value;
@@ -97,8 +113,9 @@ public final class Product {
 		this.manufacturedDate = manufacturedDate;
 		this.expirationDate = expirationDate;
 		this.status = status;
-		this.supplyer = supplyer;
+		this.supplier = supplier;
 		this.issueDate = issueDate;
+		this.demander = demander;
 	}
 
 	@Override
@@ -114,23 +131,24 @@ public final class Product {
 		Product other = (Product) obj;
 
 		return Objects.deepEquals(
-				new String[] { getId(), getName(), getOwner(), getValue(), getManufacturedDate(), getExpirationDate() },
+				new String[] { getId(), getProductId(), getName(), getOwner(), getValue(), getManufacturedDate(), getExpirationDate() },
 				new String[] { other.getId(), other.getName(), other.getOwner(), other.getValue(), other.getOwner(),
 						other.getNumberOf(), other.getManufacturedDate(), other.getExpirationDate(), other.getStatus(),
-						other.getSupplyer(), other.getIssueDate()});
+						other.getSupplier(), other.getIssueDate(), other.getDemander()});
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getId(), getName(), getOwner(), getValue(), getNumberOf(), getManufacturedDate(),
-				getExpirationDate(), getStatus(), getSupplyer(), getIssueDate());
+		return Objects.hash(getId(), getProductId(), getName(), getOwner(), getValue(), getNumberOf(), getManufacturedDate(),
+				getExpirationDate(), getStatus(), getSupplier(), getIssueDate(), getDemander());
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + " [id=" + id + ", name=" + name
+		return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + " [id=" + id + ", "
+				+ "productId=" + productId + ", name=" + name
 				+ ", owner=" + owner + ", value=" + value + " , numberOf=" + numberOf + " , manufacturedDate="
 				+ manufacturedDate + ", expirationDate=" + expirationDate + ", status=" + status 
-				+ ", supplyer=" + supplyer + ", issueDate=" + issueDate + "]";
+				+ ", supplier=" + supplier + ", issueDate=" + issueDate + "]";
 	}
 }
