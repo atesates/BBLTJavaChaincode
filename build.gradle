@@ -38,4 +38,5 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+    compile files("${project.projectDir}/src/main/lib/cplex.jar")
 }

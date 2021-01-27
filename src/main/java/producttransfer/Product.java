@@ -1,12 +1,11 @@
 package producttransfer;
 
-import com.owlike.genson.annotation.JsonProperty;
-
 import java.util.Objects;
 
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
 
+import com.owlike.genson.annotation.JsonProperty;
 @DataType()
 public final class Product {
 
