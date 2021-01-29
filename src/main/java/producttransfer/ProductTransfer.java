@@ -23,6 +23,8 @@ import ilog.concert.IloNumVar;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 
+
+
 @Contract(name = "ProductTransfer", info = @Info(title = "ProductTransfer contract", description = "A Sample product transfer chaincode example", version = "0.0.1-SNAPSHOT"))
 
 @Default
@@ -44,8 +46,10 @@ public final class ProductTransfer implements ContractInterface {
 
 		ChaincodeStub stub = ctx.getStub();
 
-		Product product = new Product("FirstOwner_FirstProduct_00.00.2000", "FirstProduct_00.00.2000", "FirstProduct",
-				"FirstOwner", "10$", "70", "01.01.2199", "02.02.2020", "on sale", "00.00.2000", "FirstOwner", " ");
+		Product product = new Product("FirstOwner_FirstProduct_00.00.2000", 
+				"FirstProduct_00.00.2000", "FirstProduct", "FirstOwner", 
+				"10$", "70",  "01.01.2199", "02.02.2020",
+				"on sale", "00.00.2000", "FirstOwner", " ");
 
 		String productState = genson.serialize(product);
 
@@ -72,10 +76,10 @@ public final class ProductTransfer implements ContractInterface {
 	 */
 
 	@Transaction()
-	public Product addNewProduct(final Context ctx, final String id, final String productId, final String name,
-			final String ownername, final String value, final String numberOf, final String expirationDate,
-			final String manufacturedDate, final String status, final String issueDate, final String supplier,
-			final String demander) {
+	public Product addNewProduct(final Context ctx, final String id, final String productId, final String name, 
+			final String ownername, final String value, final String numberOf, 
+		    final String expirationDate, final String manufacturedDate,final String status,
+		    final String issueDate,final String supplier, final String demander) {
 
 		ChaincodeStub stub = ctx.getStub();
 
@@ -87,8 +91,10 @@ public final class ProductTransfer implements ContractInterface {
 			throw new ChaincodeException(errorMessage, ProductTransferErrors.PRODUCT_ALREADY_EXISTS.toString());
 		}
 
-		Product product = new Product(id, productId, name, ownername, value, numberOf, expirationDate, manufacturedDate,
-				status, issueDate, supplier, demander);
+		Product product = new Product(id, productId, name, 
+				ownername, value, numberOf, 
+				expirationDate, manufacturedDate, status,
+				issueDate, supplier, demander);
 
 		productState = genson.serialize(product);
 
@@ -130,9 +136,7 @@ public final class ProductTransfer implements ContractInterface {
 	@Transaction()
 	public Product changeProductOwnership(final Context ctx, final String id, final String newProductOwner) {
 		DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-		Date dateobj = new Date();
-		String timeStamp = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
-
+	       Date dateobj = new Date();
 		ChaincodeStub stub = ctx.getStub();
 
 		String productState = stub.getStringState(id);
@@ -147,9 +151,10 @@ public final class ProductTransfer implements ContractInterface {
 
 		Product product = genson.deserialize(productState, Product.class);
 
-		Product newProduct = new Product(product.getId(), product.getProductId(), product.getName(), newProductOwner,
-				product.getValue(), product.getNumberOf(), product.getExpirationDate(), product.getManufacturedDate(),
-				"changed", timeStamp.toString(), product.getSupplier(), product.getDemander());
+		Product newProduct = new Product(product.getId(),product.getProductId(), product.getName(), 
+				newProductOwner, product.getValue(), product.getNumberOf(), 
+				product.getExpirationDate(), product.getManufacturedDate(),  "changed",
+				df.format(dateobj), product.getSupplier(), product.getDemander());
 
 		String newProductState = genson.serialize(newProduct);
 		stub.putStringState(id, newProductState);
@@ -192,75 +197,12 @@ public final class ProductTransfer implements ContractInterface {
 	 */
 	@Transaction()
 	public Product purchaseSomeProduct(final Context ctx, final String id, final String newProductOwner,
-			final String numberOfPurchased) {
-//------------------------------------------------------------------------------
-		int n = 3;
-		int m = 4;
-		double[] c = { 41, 35, 96 };
-
-		double[][] A = { { 2, 3, 7 }, { 1, 1, 0 }, { 5, 3, 0 }, { 0.6, 0.25, 1 } };
-
-		double[] b = { 1250, 250, 900, 232.5 };
-		try {
-			IloCplex model = new IloCplex();
-
-			IloNumVar[] x = new IloNumVar[n];
-			for (int i = 0; i < n; i++) {
-				x[i] = model.numVar(0, Double.MAX_VALUE);
-			}
-
-			IloLinearNumExpr obj = model.linearNumExpr();
-			for (int i = 0; i < n; i++) {
-				obj.addTerm(c[i], x[i]);
-			}
-			model.addMinimize(obj);
-
-			List<IloRange> constraints = new ArrayList<IloRange>();
-
-			for (int i = 0; i < m; i++) {
-				IloLinearNumExpr constraint = model.linearNumExpr();
-				for (int j = 0; j < n; j++) {
-					constraint.addTerm(A[i][j], x[j]);
-				}
-				constraints.add(model.addGe(constraint, b[i]));
-			}
-
-			boolean isSolved = model.solve();
-			if (isSolved) {
-				double objValue = model.getObjValue();
-				System.out.println("onb_val = " + objValue);
-				for (int k = 0; k < n; k++) {
-					System.out.println("x[" + (k + 1) + "] = " + model.getValue(x[k]));
-					System.out.println("Reduce cost " + (k + 1) + " = " + model.getReducedCost(x[k]));
-				}
-
-				for (int i = 0; i < m; i++) {
-
-					double slack = model.getSlack(constraints.get(1));
-
-					double dual = model.getDual(constraints.get(i));
-					if (slack == 0) {
-						System.out.println("Constraint " + (i + 1) + " is binding.");
-					} else {
-						System.out.println("Constraint " + (i + 1) + " is non-binding.");
-					}
-
-					System.out.println("Shadow price " + (i + 1) + " = " + dual);
-				}
-			} else {
-				System.out.println("Model is not solved");
-			}
-
-		} catch (IloException ex) {
-			ex.printStackTrace();
-		}
-
-		// ---------------------------------------------------------------------
+			final String numberOfPurchased) {		
 		DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-		Date dateobj = new Date();
-		String timeStamp = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
-
-		ChaincodeStub stub = ctx.getStub();
+	       Date dateobj = new Date();
+	       String timeStamp = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
+		
+	       ChaincodeStub stub = ctx.getStub();
 
 		String productState = stub.getStringState(id);
 
@@ -274,47 +216,55 @@ public final class ProductTransfer implements ContractInterface {
 
 		Integer remaining = Integer.parseInt(product.getNumberOf()) - Integer.parseInt(numberOfPurchased);
 
-		Product newProduct = new Product(product.getId(), product.getProductId(), product.getName(), product.getOwner(),
-				product.getValue(), remaining.toString(), product.getExpirationDate(), product.getManufacturedDate(),
-				"on sale", timeStamp.toString(), product.getSupplier(), product.getDemander());
-
+		Product newProduct = new Product(product.getId(), product.getProductId(), product.getName(), 
+				product.getOwner(), product.getValue(),remaining.toString(), 
+				product.getExpirationDate(), product.getManufacturedDate(),  "on sale",
+				timeStamp.toString(), product.getSupplier(), product.getDemander());
+		
 		if (remaining > 0) {// if the number of the supply is enough for purchase
-
-			String newProductState = genson.serialize(newProduct); // update supply
-			stub.putStringState(id, newProductState);
-
-			Product newProduct2 = new Product(newProductOwner + "_" + product.getName() + "_" + product.getIssueDate(),
-					product.getProductId(), product.getName(), newProductOwner, product.getValue(),
-					numberOfPurchased.toString(), product.getExpirationDate(), product.getManufacturedDate(),
-					"purchased", timeStamp.toString(), product.getOwner(), newProductOwner);
-
-			String newProductState2 = genson.serialize(newProduct2); // create purchase
-			stub.putStringState(id, newProductState2);
-
-			return newProduct;
-
-		} else if (remaining == 0) {// all product is purchased
-			// delete supply
-
-			stub.delState(id);
-
-			Product newProduct2 = new Product(newProductOwner + "_" + product.getName() + "_" + product.getIssueDate(),
-					product.getProductId(), product.getName(), newProductOwner, product.getValue(),
-					numberOfPurchased.toString(), product.getManufacturedDate(), product.getExpirationDate(),
-					"purchased", timeStamp.toString(), product.getOwner(), newProductOwner);
-
-			String newProductState2 = genson.serialize(newProduct2); // create purchase
-			stub.putStringState(id, newProductState2);
-
-			return newProduct2;
-
-		} else {// intended to be purchased product is more than supply
+			
+			
+			  String newProductState = genson.serialize(newProduct); //update supply
+			  stub.putStringState(id, newProductState);
+			  
+			  Product newProduct2 = new Product(newProductOwner + "_" + product.getName() + "_" + 
+			  product.getIssueDate(), product.getProductId(), product.getName(),
+			  newProductOwner, product.getValue(), numberOfPurchased.toString(),
+			  product.getExpirationDate(), product.getManufacturedDate(),"purchased",
+			  timeStamp.toString(), product.getOwner(), newProductOwner);
+			  
+			  String newProductState2 = genson.serialize(newProduct2); //create purchase
+			  stub.putStringState(id, newProductState2);
+			  
+			  return newProduct;
+			 
+		} else if(remaining == 0) {//all product is purchased
+			//delete supply		
+			
+			  stub.delState(id);
+			  
+			  Product newProduct2 = new Product(newProductOwner + "_" + product.getName() +"_" + 
+			  product.getIssueDate(), product.getProductId(), product.getName(),
+			  newProductOwner, product.getValue(), numberOfPurchased.toString(),
+			  product.getManufacturedDate(), product.getExpirationDate(), "purchased",
+			  timeStamp.toString(), product.getOwner(), newProductOwner);
+			  
+			  String newProductState2 = genson.serialize(newProduct2); //create purchase
+			  stub.putStringState(id, newProductState2);
+			  
+			  return newProduct2;
+			 		
+			
+		}
+		else {//intended to be purchased product is more than supply
 			String errorMessage = String.format("Supply %s is not enough", id);
 			System.out.println(errorMessage);
 			throw new ChaincodeException(errorMessage, ProductTransferErrors.SUPPLY_NOT_ENOUGH.toString());
 		}
 
 	}
+	
+
 
 	/*
 	 * Minimize z = 41x1 + 35x2 +96x3
@@ -363,69 +313,52 @@ public final class ProductTransfer implements ContractInterface {
 
 		return A;
 	}
+
 	@Transaction()
 	public String solveModel(final Context ctx, final String _n, final String _m, final String _c, final String _A,
 			final String _b) {
 
-		int n = Integer.parseInt(_n);
-		int m = Integer.parseInt(_m);
-		double[] c = convertToDoubleArray(_c);
-		double[][] A = convertToDouble2DArray(_A);
-		double[] b = convertToDoubleArray(_b);
-
-		try {
-			IloCplex model = new IloCplex();
-
-			IloNumVar[] x = new IloNumVar[n];
-			for (int i = 0; i < n; i++) {
-				x[i] = model.numVar(0, Double.MAX_VALUE);
-			}
-
-			IloLinearNumExpr obj = model.linearNumExpr();
-			for (int i = 0; i < n; i++) {
-				obj.addTerm(c[i], x[i]);
-			}
-			model.addMinimize(obj);
-
-			List<IloRange> constraints = new ArrayList<IloRange>();
-
-			for (int i = 0; i < m; i++) {
-				IloLinearNumExpr constraint = model.linearNumExpr();
-				for (int j = 0; j < n; j++) {
-					constraint.addTerm(A[i][j], x[j]);
-				}
-				constraints.add(model.addGe(constraint, b[i]));
-			}
-
-			boolean isSolved = model.solve();
-			if (isSolved) {
-				double objValue = model.getObjValue();
-				System.out.println("onb_val = " + objValue);
-				for (int k = 0; k < n; k++) {
-					System.out.println("x[" + (k + 1) + "] = " + model.getValue(x[k]));
-					System.out.println("Reduce cost " + (k + 1) + " = " + model.getReducedCost(x[k]));
-				}
-
-				for (int i = 0; i < m; i++) {
-
-					double slack = model.getSlack(constraints.get(1));
-
-					double dual = model.getDual(constraints.get(i));
-					if (slack == 0) {
-						System.out.println("Constraint " + (i + 1) + " is binding.");
-					} else {
-						System.out.println("Constraint " + (i + 1) + " is non-binding.");
-					}
-
-					System.out.println("Shadow price " + (i + 1) + " = " + dual);
-				}
-			} else {
-				System.out.println("Model is not solved");
-			}
-
-		} catch (IloException ex) {
-			ex.printStackTrace();
-		}
+		/*
+		 * int n = Integer.parseInt(_n); int m = Integer.parseInt(_m); double[] c =
+		 * convertToDoubleArray(_c); double[][] A = convertToDouble2DArray(_A); double[]
+		 * b = convertToDoubleArray(_b);
+		 * 
+		 * try {
+		 * 
+		 * @SuppressWarnings("resource") IloCplex model = new IloCplex();
+		 * 
+		 * IloNumVar[] x = new IloNumVar[n]; for (int i = 0; i < n; i++) { x[i] =
+		 * model.numVar(0, Double.MAX_VALUE); }
+		 * 
+		 * IloLinearNumExpr obj = model.linearNumExpr(); for (int i = 0; i < n; i++) {
+		 * obj.addTerm(c[i], x[i]); } model.addMinimize(obj);
+		 * 
+		 * List<IloRange> constraints = new ArrayList<IloRange>();
+		 * 
+		 * for (int i = 0; i < m; i++) { IloLinearNumExpr constraint =
+		 * model.linearNumExpr(); for (int j = 0; j < n; j++) {
+		 * constraint.addTerm(A[i][j], x[j]); } constraints.add(model.addGe(constraint,
+		 * b[i])); }
+		 * 
+		 * boolean isSolved = model.solve(); if (isSolved) { double objValue =
+		 * model.getObjValue(); System.out.println("onb_val = " + objValue); for (int k
+		 * = 0; k < n; k++) { System.out.println("x[" + (k + 1) + "] = " +
+		 * model.getValue(x[k])); System.out.println("Reduce cost " + (k + 1) + " = " +
+		 * model.getReducedCost(x[k])); }
+		 * 
+		 * for (int i = 0; i < m; i++) {
+		 * 
+		 * double slack = model.getSlack(constraints.get(1));
+		 * 
+		 * double dual = model.getDual(constraints.get(i)); if (slack == 0) {
+		 * System.out.println("Constraint " + (i + 1) + " is binding."); } else {
+		 * System.out.println("Constraint " + (i + 1) + " is non-binding."); }
+		 * 
+		 * System.out.println("Shadow price " + (i + 1) + " = " + dual); } } else {
+		 * System.out.println("Model is not solved"); }
+		 * 
+		 * } catch (IloException ex) { ex.printStackTrace(); }
+		 */
 		return "Model is not solved";
 	}
 }
