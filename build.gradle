@@ -27,9 +27,19 @@ repositories {
         url 'https://jitpack.io'
     }
 }
-
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'producttransfer.Pharmacies'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
 dependencies {
-	implementation 'org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.3.1'
+	implementation 'org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.2.+'
 	
 	implementation 'com.owlike:genson:1.5'
     // This dependency is exported to consumers, that is to say found on their compile classpath.
@@ -41,6 +51,6 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     //for compiling with cplex.jar
-    //compile files("${project.projectDir}/src/main/lib/cplex.jar")
     compile files("/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux")
+    compile files("${project.projectDir}/src/main/lib/cplex.jar")
 }
