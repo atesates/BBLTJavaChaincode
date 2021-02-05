@@ -33,6 +33,7 @@ task fatJar(type: Jar) {
         attributes 'Implementation-Title': 'Gradle Jar File Example',  
         	'Implementation-Version': version,
         	'Main-Class': 'producttransfer.Pharmacies'
+        	//,'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -51,6 +52,6 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     //for compiling with cplex.jar
-    compile files("/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux")
+    //compile files("/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux")
     compile files("${project.projectDir}/src/main/lib/cplex.jar")
 }

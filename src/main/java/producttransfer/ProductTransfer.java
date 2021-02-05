@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -16,7 +17,6 @@ import org.hyperledger.fabric.contract.annotation.Transaction;
 import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import com.owlike.genson.Genson;
-
 import ilog.concert.*;
 import ilog.cplex.*;
 
@@ -38,7 +38,7 @@ public final class ProductTransfer implements ContractInterface {
 	 */
 	@Transaction()
 	public void initLedger(final Context ctx) {
-
+		
 		ChaincodeStub stub = ctx.getStub();
 
 		Product product = new Product("FirstOwner_FirstProduct_00.00.2000", "FirstProduct_00.00.2000", "FirstProduct",
@@ -298,8 +298,12 @@ public final class ProductTransfer implements ContractInterface {
 
 	@Transaction()
 	public String solveModel(final Context ctx, final String _n, final String _m, final String _c, final String _A,
-			final String _b) {
-
+			final String _b) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IloException {
+		System.setProperty( "java.library.path", "/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux" );
+		Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+		fieldSysPath.setAccessible( true );
+		fieldSysPath.set( null, null );
+		
 		int n = Integer.parseInt(_n);
 		int m = Integer.parseInt(_m);
 		double[] c = convertToDoubleArray(_c);

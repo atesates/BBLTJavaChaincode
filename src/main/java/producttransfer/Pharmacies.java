@@ -1,5 +1,7 @@
 package producttransfer;
 
+import java.lang.reflect.Field;
+
 /*Minimize z = 5x112 + 10x113 + 5x114
  *       4x21        + 3x23   + 5x24
  *       10    12               5
@@ -33,7 +35,7 @@ import ilog.concert.IloException;
 
 public class Pharmacies {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
 		int n = 3;
 		int m = 4;
@@ -49,9 +51,12 @@ public class Pharmacies {
 		solveModel(n, m, c, A, b);
 	}
 
-	public static void solveModel(int n, int m, double[] c, double[][] A, double[] b) {
+	public static void solveModel(int n, int m, double[] c, double[][] A, double[] b) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		try {
-			
+			System.setProperty( "java.library.path", "/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux" );
+			Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+			fieldSysPath.setAccessible( true );
+			fieldSysPath.set( null, null );
 			IloCplex model = new IloCplex();
 
 			IloNumVar[] x = new IloNumVar[n];
