@@ -56,7 +56,7 @@ public class Pharmacies {
 			//System.setProperty( "java.library.path", "/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux" );
 			//System.setProperty( "java.library.path", "/opt/gopath/src/github.com/hyperledger/fabric-samples/chaincode/chaincode_example02/java/" );
 			//System.setProperty( "java.library.path","/root/chaincode-java/chaincode/src/ilog" ); Field fieldSysPath =
-			System.setProperty( "java.library.path", "./lib" );
+			System.setProperty( "java.library.path", "/root/chaincode-java/IBM_CPLEX/cplex/bin/x86-64_linux" );
 			Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
 			fieldSysPath.setAccessible( true );
 			fieldSysPath.set( null, null );
