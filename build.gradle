@@ -41,7 +41,7 @@ task fatJar(type: Jar) {
 }
 dependencies {
 	implementation 'org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.2.+'
-	
+	//manifest{'Main-Class': 'producttransfer.Pharmacies'}
 	implementation 'com.owlike:genson:1.5'
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api 'org.apache.commons:commons-math3:3.6.1'
