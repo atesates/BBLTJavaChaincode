@@ -297,9 +297,10 @@ public final class ProductTransfer implements ContractInterface {
 	}
 
 	@Transaction()
-	public String solveModel(final Context ctx, final String _n, final String _m, final String _c, final String _A,
+	public String solveMyModel(final Context ctx, final String _n, final String _m, final String _c, final String _A,
 			final String _b) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IloException {
-		System.setProperty( "java.library.path", "/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux" );
+		//System.setProperty( "java.library.path", "/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux" );
+		System.setProperty( "java.library.path", "/root/chaincode-java/lib" );
 		Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
 		fieldSysPath.setAccessible( true );
 		fieldSysPath.set( null, null );
