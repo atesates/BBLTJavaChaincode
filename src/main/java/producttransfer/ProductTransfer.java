@@ -297,7 +297,7 @@ public final class ProductTransfer implements ContractInterface {
 	}
 
 	@Transaction()
-	public String solveMyModel(final Context ctx, final String _n, final String _m, final String _c, final String _A,
+	public Product solveMyModel(final Context ctx, final String _n, final String _m, final String _c, final String _A,
 			final String _b) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IloException {
 		//System.setProperty( "java.library.path", "/home/ates/IBM_CPLEX/cplex/bin/x86-64_linux" );
 		System.setProperty( "java.library.path", "/root/chaincode-java/IBM_CPLEX/cplex/bin/x86-64_linux" );
@@ -311,6 +311,19 @@ public final class ProductTransfer implements ContractInterface {
 		double[][] A = convertToDouble2DArray(_A);
 		double[] b = convertToDoubleArray(_b);
 
+		ChaincodeStub stub = ctx.getStub();
+		
+		String productState = stub.getStringState("Pharmacy1_AUGBID_01.01.2021");
+
+		if (productState.isEmpty()) {
+			String errorMessage = String.format("Product %s does not exist", "Pharmacy1_AUGBID_01.01.2021");
+			System.out.println(errorMessage);
+			throw new ChaincodeException(errorMessage, ProductTransferErrors.PRODUCT_NOT_FOUND.toString());
+		}
+
+		Product product = genson.deserialize(productState, Product.class);
+		
+		
 		try {
 
 			@SuppressWarnings("resource")
@@ -366,7 +379,7 @@ public final class ProductTransfer implements ContractInterface {
 		} catch (IloException ex) {
 			ex.printStackTrace();
 		}
-
-		return "Model is not solved";
+		return product;
+		//return "Model is not solved";
 	}
 }
