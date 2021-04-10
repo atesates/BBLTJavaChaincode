@@ -1,15 +1,13 @@
-package producttransfer;
+package medicinetransfer;
 
 import com.owlike.genson.annotation.JsonProperty;
-
-import java.util.Objects;
-
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
+import java.util.Objects;
+
 
 @DataType()
-public final class Product {
-
+public final class Medicine {
 	@Property()
 	private final String id;
 
@@ -94,7 +92,9 @@ public final class Product {
 		return demander;
 	}
 
-	public Product(@JsonProperty("id") final String id, @JsonProperty("productId") final String productId,
+	
+	
+	public Medicine(@JsonProperty("id") final String id, @JsonProperty("productId") final String productId,
 			@JsonProperty("name") final String name, @JsonProperty("owner") final String owner,
 			@JsonProperty("value") final String value, @JsonProperty("numberOf") final String numberOf,
 			@JsonProperty("expirationDate") final String expirationDate,
@@ -114,7 +114,7 @@ public final class Product {
 		this.supplier = supplier;
 		this.demander = demander;
 	}
-
+	
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
@@ -125,7 +125,7 @@ public final class Product {
 			return false;
 		}
 
-		Product other = (Product) obj;
+		Medicine other = (Medicine) obj;
 
 		return Objects.deepEquals(
 				new String[] { getId(), getProductId(), getName(), getOwner(), getValue(), getNumberOf(),
@@ -135,7 +135,7 @@ public final class Product {
 						other.getNumberOf(), other.getExpirationDate(), other.getManufacturedDate(), other.getStatus(),
 						other.getIssueDate(), other.getSupplier(), other.getDemander() });
 	}
-
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(getId(), getProductId(), getName(), getOwner(), getValue(), getNumberOf(),
