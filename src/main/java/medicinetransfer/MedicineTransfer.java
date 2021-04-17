@@ -78,7 +78,7 @@ public final class MedicineTransfer implements ContractInterface  {
 	 */
 
 	@Transaction()
-	public Medicine addNewProduct(final Context ctx, final String id, final String productId, final String name,
+	public Medicine AddNewProduct(final Context ctx, final String id, final String productId, final String name,
 			final String ownername, final String value, final String numberOf, final String expirationDate,
 			final String manufacturedDate, final String status, final String issueDate, final String supplier,
 			final String demander) {
@@ -111,7 +111,7 @@ public final class MedicineTransfer implements ContractInterface  {
 	 * @return the product found on the ledger if there was one
 	 */
 	@Transaction()
-	public Medicine queryProductById(final Context ctx, final String id) {
+	public Medicine QueryProductById(final Context ctx, final String id) {
 		ChaincodeStub stub = ctx.getStub();
 		String productState = stub.getStringState(id);
 
@@ -133,7 +133,7 @@ public final class MedicineTransfer implements ContractInterface  {
      * @return array of assets found on the ledger
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public String GetAllAssets(final Context ctx) {
+    public String GetAllProducts(final Context ctx) {
         ChaincodeStub stub = ctx.getStub();
 
         List<Medicine> queryResults = new ArrayList<Medicine>();
@@ -164,7 +164,7 @@ public final class MedicineTransfer implements ContractInterface  {
 	 * @return the updated product
 	 */
 	@Transaction()
-	public Medicine changeProductOwnership(final Context ctx, final String id, final String newProductOwner) {
+	public Medicine ChangeProductOwnership(final Context ctx, final String id, final String newProductOwner) {
 		DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 		Date dateobj = new Date();
 		ChaincodeStub stub = ctx.getStub();
@@ -199,7 +199,7 @@ public final class MedicineTransfer implements ContractInterface  {
 	 * @return the updated product
 	 */
 	@Transaction()
-	public String deleteProduct(final Context ctx, final String id) {
+	public String DeleteProduct(final Context ctx, final String id) {
 		ChaincodeStub stub = ctx.getStub();
 
 		String productState = stub.getStringState(id);
@@ -225,11 +225,14 @@ public final class MedicineTransfer implements ContractInterface  {
 	 * @return the updated product
 	 */
 	@Transaction()
-	public Medicine purchaseSomeProduct(final Context ctx, final String id, final String newProductOwner,
-			final String numberOfPurchased) {
+	public Medicine PurchaseSomeProduct(final Context ctx, final String id, final String newProductOwner,
+			final String numberOfPurchased, final String optimizationDurationInSecond) {
 		//DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 		String timeStamp = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
-
+	
+		//For optimization we are waiting a while
+		waitForOptimization(optimizationDurationInSecond);
+			
 		ChaincodeStub stub = ctx.getStub();
 
 		String productState = stub.getStringState(id);
@@ -284,6 +287,18 @@ public final class MedicineTransfer implements ContractInterface  {
 			throw new ChaincodeException(errorMessage, ProductTransferErrors.SUPPLY_NOT_ENOUGH.toString());
 		}
 
+	}
+
+	private void waitForOptimization(final String optimizationDurationInSecond) {
+		int duration = Integer.parseInt(optimizationDurationInSecond);
+		duration = duration * 1000; // convert to to millisecond 
+		long starting = System.currentTimeMillis();
+		long elapsed = System.currentTimeMillis();
+		while (true) {//Or any Loops
+		   elapsed = System.currentTimeMillis() - starting;
+		   if(elapsed >= duration)
+			   break;
+		}
 	}
 
 	/*
