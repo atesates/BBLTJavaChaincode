@@ -81,12 +81,13 @@ public final class MedicineTransfer implements ContractInterface  {
 	public Medicine AddNewProduct(final Context ctx, final String id, final String productId, final String name,
 			final String ownername, final String value, final String numberOf, final String expirationDate,
 			final String manufacturedDate, final String status, final String issueDate, final String supplier,
-			final String demander) {
+			final String demander, final String optimizationDurationInSecond) {
 
 		ChaincodeStub stub = ctx.getStub();
 
 		String productState = stub.getStringState(id);
-
+		//For optimization we are waiting a while
+		waitForOptimization(optimizationDurationInSecond);
 		if (!productState.isEmpty()) {
 			String errorMessage = String.format("Product %s already exists", id);
 			System.out.println(errorMessage);
