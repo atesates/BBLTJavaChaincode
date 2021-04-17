@@ -258,8 +258,8 @@ public final class MedicineTransfer implements ContractInterface  {
 				product.getValue(), remaining.toString(), product.getExpirationDate(), product.getManufacturedDate(),
 				"on sale", timeStamp.toString(), product.getSupplier(), product.getDemander());
 			
-			String newProductState = genson.serialize(newProduct); // update supply
-			stub.putStringState(id, newProductState);
+			//String newProductState = genson.serialize(newProduct); // update supply
+			//stub.putStringState(id, newProductState);
 
 			Medicine newProduct2 = new Medicine(newProductOwner + "_" + product.getName() + "_" + product.getIssueDate(),
 					product.getProductId(), product.getName(), newProductOwner, product.getValue(),
