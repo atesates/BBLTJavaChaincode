@@ -253,6 +253,11 @@ public final class MedicineTransfer implements ContractInterface  {
 
 		if (remaining > 0) {// if the number of the supply is enough for purchase
 
+								
+			newProduct = UpdateAsset(ctx, product.getId(), product.getProductId(), product.getName(), product.getOwner(),
+				product.getValue(), remaining.toString(), product.getExpirationDate(), product.getManufacturedDate(),
+				"on sale", timeStamp.toString(), product.getSupplier(), product.getDemander());
+			
 			String newProductState = genson.serialize(newProduct); // update supply
 			stub.putStringState(id, newProductState);
 
@@ -288,7 +293,54 @@ public final class MedicineTransfer implements ContractInterface  {
 		}
 
 	}
+    /**
+     * Updates the properties of an asset on the ledger.
+     *
+     * @param ctx the transaction context
+     * @param assetID the ID of the asset being updated
+     * @param color the color of the asset being updated
+     * @param size the size of the asset being updated
+     * @param owner the owner of the asset being updated
+     * @param appraisedValue the appraisedValue of the asset being updated
+     * @return the transferred asset
+     */
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public Medicine UpdateAsset(final Context ctx, final String id, final String productId, final String name,
+			final String ownername, final String value, final String numberOf, final String expirationDate,
+			final String manufacturedDate, final String status, final String issueDate, final String supplier,
+			final String demander) {
+        ChaincodeStub stub = ctx.getStub();
 
+        if (!MedicineExists(ctx, id)) {
+            String errorMessage = String.format("Product %s does not exist", id);
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage, ProductTransferErrors.PRODUCT_NOT_FOUND.toString());
+        }
+
+        Medicine product = new Medicine(id, productId, name, ownername, value, numberOf, expirationDate, manufacturedDate,
+				status, issueDate, supplier, demander);
+        
+        
+        String newAssetJSON = genson.serialize(product);
+        stub.putStringState(id, newAssetJSON);
+
+        return product;
+    }
+    
+    /**
+     * Checks the existence of the asset on the ledger
+     *
+     * @param ctx the transaction context
+     * @param productID the ID of the asset
+     * @return boolean indicating the existence of the asset
+     */
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public boolean MedicineExists(final Context ctx, final String id) {
+        ChaincodeStub stub = ctx.getStub();
+        String assetJSON = stub.getStringState(id);
+
+        return (assetJSON != null && !assetJSON.isEmpty());
+    }
 	private void waitForOptimization(final String optimizationDurationInSecond) {
 		int duration = Integer.parseInt(optimizationDurationInSecond);
 		duration = duration * 1000; // convert to to millisecond 
